@@ -26,6 +26,34 @@ afficher_aide() {
     exit 0
 }
 
+
+if [ ! -d "input" ]
+then
+    echo "Le dossier 'input' n'existe pas. Création du dossier..."
+    mkdir "input"
+else
+    echo "Le dossier 'input' existe déjà."
+    echo
+fi
+
+if [ ! -d "output" ]
+then
+    echo "Le dossier 'output' n'existe pas. Création du dossier..."
+    mkdir "output"
+else
+    echo "Le dossier 'output' existe déjà."
+    echo
+fi
+
+if [ ! -d "tests" ]
+then
+    echo "Le dossier 'tests' n'existe pas. Création du dossier..."
+    mkdir "tests"
+else
+    echo "Le dossier 'tests' existe déjà."
+    echo
+fi
+
 # Vérifie si l'option d'aide (-h) est présente
 for arg in "$@"; do
     if [[ "$arg" == "-h" ]]; then
@@ -37,7 +65,9 @@ done
 if [[ "$#" -lt 3 ]]
 then
     echo "Erreur : Au moins 3 paramètres obligatoires sont nécessaires."
-    echo "Utilisez -h pour afficher l'aide."
+    echo "Durée du traitement : 0 secondes."
+    echo
+    afficher_aide
     exit 1
 fi
 
@@ -51,6 +81,8 @@ centrale="${4:-}" # Optionnel : valeur par défaut vide
 if [[ ! -f "$fichier" ]]
 then
     echo "Erreur : Le fichier '$fichier' est introuvable."
+    echo
+    afficher_aide
     exit 1
 fi
 
@@ -59,6 +91,8 @@ if [[ "$station" != "hvb" && "$station" != "hva" && "$station" != "lv" ]]
 then
     echo "Erreur : Le type de station '$station' est invalide. Valeurs possibles : hvb, hva, lv."
     echo "Durée du traitement : 0 secondes."
+    echo
+    afficher_aide
     exit 1
 fi
 
@@ -66,6 +100,8 @@ fi
 if [[ "$consommateur" != "comp" && "$consommateur" != "indiv" && "$consommateur" != "all" ]]
 then
     echo "Erreur : Le type de consommateur '$consommateur' est invalide. Valeurs possibles : comp, indiv, all."
+    echo "Durée du traitement : 0 secondes."
+    afficher_aide
     exit 1
 fi
 
@@ -74,6 +110,8 @@ if [[ "$station" == "hvb" && ("$consommateur" == "all" || "$consommateur" == "in
    [[ "$station" == "hva" && ("$consommateur" == "all" || "$consommateur" == "indiv") ]]
 then
     echo "Erreur : La combinaison '$station' et '$consommateur' est interdite."
+    echo "Durée du traitement : 0 secondes."    
+    afficher_aide
     exit 1
 fi
 
@@ -81,10 +119,14 @@ fi
 if [[ -n "$centrale" && ! "$centrale" =~ ^[0-9]+$ ]]
 then
     echo "Erreur : L'identifiant de la centrale '$centrale' doit être un nombre."
+    echo "Durée du traitement : 0 secondes."
+    echo
+    afficher_aide
     exit 1
 fi
 
 # Traitement principal
+echo
 echo "Traitement en cours..."
 echo
 echo "  Fichier d'entrée         : $fichier"
@@ -121,6 +163,7 @@ if [ ! -x "$executable" ]; then
        echo
    else
        echo "Erreur lors de la compilation."
+       
        exit 1
    fi
 else
@@ -129,27 +172,19 @@ else
 fi
 
 
-if [ ! -d "tmp" ]
-then
-    echo "Le répertoire tmp n'existe pas. Création du répertoire tmp."
-    mkdir -p tmp
-else
-    echo "Le répertoire tmp existe déjà. Vide le contenu."
-    rm -f tmp/*
-fi
-
-# Vérifier et créer le répertoire graphs s'il n'existe pas
-if [ ! -d "graphs" ]
-then
-    echo "Le répertoire graphs n'existe pas. Création du répertoire graphs."
-    echo
-    mkdir -p graphs
-else
-    echo "Le répertoire graphs existe déjà."
-    echo
-fi
-
-
+for dir in "tmp" "graphs" "output"; do
+    if [ ! -d "$dir" ]; then
+        mkdir -p "$dir"
+        echo "Le dossier '$dir' n'existe pas. creation de '$dir'... "
+        echo
+    else
+        # Vider le répertoire s'il n'est pas vide
+        if [ "$(ls -A $dir)" ]; then
+            mv "$dir"/* tests/
+        fi
+        rm -f "$dir"/*
+    fi
+done
 
 # Enregistrement du début du traitement
 start_time=$(date +%s)
@@ -186,12 +221,16 @@ then
         echo "Résultat APRES le script c : tmp/hvb_AFTER_C.csv"
 
         # Tri de tmp/hvb_AFTER_C.csv par la deuxième colonne (en croissant)
+        
         if [[ -n "$centrale" ]]; then
-            sort -t':' -k2,2n tmp/hvb_AFTER_C.csv > tmp/hvb_comp_$centrale.csv
-            echo "Résultat final : tmp/hvb_comp_$centrale.csv"
+            sort -t':' -k2,2n tmp/hvb_AFTER_C.csv > output/hvb_comp_$centrale.csv
+            echo "Résultat final : output/hvb_comp_$centrale.csv"
+            echo "HVB:Capacité:Consommation (entreprises)"\
+            | cat - output/hvb_comp_$centrale.csv > temp && mv temp output/hvb_comp_$centrale.csv
         else
-            sort -t':' -k2,2n tmp/hvb_AFTER_C.csv > tmp/hvb_comp.csv
-            echo "Résultat final : tmp/hvb_comp.csv"
+            sort -t':' -k2,2n tmp/hvb_AFTER_C.csv > output/hvb_comp.csv
+            echo "HVB:Capacité:Consommation (entreprises)" cat - output/hvb_comp.csv > temp && mv temp output/hvb_comp.csv
+            echo "Résultat final : output/hvb_comp.csv"
         fi
     fi
 
@@ -200,7 +239,7 @@ elif [[ "$station" == "hva" ]]
 then
     if [[ "$consommateur" == "comp" ]]
     then
-        if [[ -n "$centrale" ]]  # Si une centrale est spécifiée
+        if [[ -n "$centrale" ]]  
         then
             # Filtrage par centrale et traitement
             awk -v centrale="$centrale" -F';' '
@@ -228,11 +267,15 @@ then
        # Tri de tmp/hva_AFTER_C.csv par la deuxième colonne (en croissant)
         if [[ -n "$centrale" ]]
         then
-            sort -t':' -k2,2n tmp/hva_AFTER_C.csv > tmp/hva_comp_$centrale.csv
-            echo "Résultat final : tmp/hva_comp_$centrale.csv"
+            sort -t':' -k2,2n tmp/hva_AFTER_C.csv > output/hva_comp_$centrale.csv
+            echo "Résultat final : output/hva_comp_$centrale.csv"
+            echo "HVA:Capacité:Consommation (entreprises)"\
+            | cat - output/hva_comp_$centrale.csv > temp && mv temp output/hva_comp_$centrale.csv
         else
-            sort -t':' -k2,2n tmp/hva_AFTER_C.csv > tmp/hva_comp.csv
-            echo "Résultat final : tmp/hva_comp.csv"
+            sort -t':' -k2,2n tmp/hva_AFTER_C.csv > output/hva_comp.csv
+            echo "Résultat final : output/hva_comp.csv"
+ 	    echo "HVA:Capacité:Consommation (entreprises)" | cat - output/hvb_comp.csv > temp && mv temp output/hvb_comp.csv
+
         fi
     fi
 
@@ -269,20 +312,23 @@ then
 
           if [[ -n "$centrale" ]]
         then
-            sort -t':' -k2,2n tmp/lv_comp_APRES_C.csv > tmp/lv_comp_$centrale.csv
-            echo "Résultat final : tmp/lv_comp_$centrale.csv"
+            sort -t':' -k2,2n tmp/lv_comp_APRES_C.csv > output/lv_comp_$centrale.csv
+            echo "Résultat final : output/lv_comp_$centrale.csv"
+            echo "LV:Capacité:Consommation (entreprises)"\
+            | cat - output/lv_comp_$centrale.csv > temp && mv temp output/lv_comp_$centrale.csv
         else
-            sort -t':' -k2,2n tmp/lv_comp_APRES_C.csv > tmp/lv_comp.csv
-            echo "Résultat final : tmp/lv_comp.csv"
+            sort -t':' -k2,2n tmp/lv_comp_APRES_C.csv > output/lv_comp.csv
+            echo "Résultat final : output/lv_comp.csv"
+            echo "LV:Capacité:Consommation (entreprises)" | cat - output/lv_comp.csv > temp && mv temp output/lv_comp.csv
         fi
     
 
 
-    elif [[ "$consommateur" == "indiv" ]]
+ elif [[ "$consommateur" == "indiv" ]]
     then
     if [[ -n "$centrale" ]]  # Si une centrale est spécifiée
         then
-        awk -F';' '
+        awk -v centrale="$centrale" -F';' '
         $1 == centrale && $4 != "-" && $5 == "-" {
                 gsub(/-/, "0", $7); gsub(/-/, "0", $8);
                 print $4 ";" $7 ";" $8
@@ -307,19 +353,23 @@ then
 
       if [[ -n "$centrale" ]]
         then
-            sort -t':' -k2,2n tmp/lv_indiv_APRES_C.csv > tmp/lv_indiv_$centrale.csv
-            echo "Résultat final : tmp/lv_indiv_$centrale.csv"
+            sort -t':' -k2,2n tmp/lv_indiv_APRES_C.csv > output/lv_indiv_$centrale.csv
+            echo "Résultat final : output/lv_indiv_$centrale.csv"
+            echo "LV:Capacité:Consommation (particuliers)"\
+            | cat - output/lv_indiv_$centrale.csv > temp && mv temp output/lv_indiv_$centrale.csv
         else
-            sort -t':' -k2,2n tmp/lv_indiv_APRES_C.csv > tmp/lv_indiv.csv
-            echo "Résultat final : tmp/lv_indiv.csv"
+            sort -t':' -k2,2n tmp/lv_indiv_APRES_C.csv > output/lv_indiv.csv
+            echo "Résultat final : output/lv_indiv.csv"
+            echo "LV:Capacité:Consommation (particuliers)" | cat - output/lv_indiv.csv > temp && mv temp output/lv_indiv.csv
         fi
+
 
 
     elif [[ "$consommateur" == "all" ]]
     then
    	 if [[ -n "$centrale" ]] 
         then    	 
-        awk -F';' '
+        awk -v centrale="$centrale" -F';' '
           $1 == centrale && $4 != "-" && $2 == "-" {
                 gsub(/-/, "0", $7); gsub(/-/, "0", $8);
                 print $4 ";" $7 ";" $8
@@ -345,47 +395,71 @@ then
          # Tri de tmp/lv_all_result.csv par la troisieme colonne (en croissant) en utilisant ':' comme séparateur
         if [[ -n "$centrale" ]]
         then
-        	 sort -t':' -k3,3n tmp/lv_all_APRES_C.csv > tmp/lv_all_$centrale.csv
-       		 echo "Résultat final : tmp/lv_all_$centrale.csv"
+        	 sort -t':' -k2,2n tmp/lv_all_APRES_C.csv > output/lv_all_$centrale.csv
+       		 echo "Résultat final : output/lv_all_$centrale.csv"
         else
-       	 	 sort -t':' -k3,3n tmp/lv_all_APRES_C.csv > tmp/lv_all.csv
-       		 echo "Résultat final : tmp/lv_all.csv"
+       	 	 sort -t':' -k2,2n tmp/lv_all_APRES_C.csv > output/lv_all.csv
+       		 echo "Résultat final : output/lv_all.csv"
         fi
 
        
-       
+input_file_c="tmp/lv_all_top20_$centrale.csv"
+input_file="tmp/lv_all_top20.csv"
+output_file="output/lv_all_minmax.csv"
+output_file_c="output/lv_all_minmax_$centrale.csv"
+
+      
 
 
 	if [[ -n "$centrale" ]]
         then
-		# Sélection des 10 postes avec la plus grande consommation (les 10 derniers en triant par ordre croissant)
-		tail -n 10 tmp/lv_all_$centrale.csv | sort -t':' -k3,3nr > tmp/lv_all_max_$centrale.csv
-		echo "Top 10 postes avec la plus grande consommation : tmp/lv_all_max_$centrale.csv"
+        
+		sort -t':' -k3,3n tmp/lv_all_APRES_C.csv | head -n 10 > "$input_file_c"
+		sort -t':' -k3,3n tmp/lv_all_APRES_C.csv | tail -n 10 >> "$input_file_c"
 
-		# Sélection des 10 postes avec la plus faible consommation (les 10 premiers)
-		head -n 10 tmp/lv_all_$centrale.csv > tmp/lv_all_min_$centrale.csv
-		echo "Top 10 postes avec la plus faible consommation : tmp/lv_all_min_$centrale.csv"
+       		echo "VOICI LES 20 DONT FAUT FAIRE LA DIFF ABSOLUE : tmp/lv_all_top20_$centrale.csv"
+	       		
+		awk -F: '{diff = ($2 - $3) < 0 ? ($3 - $2) : ($2 - $3); print $1 ":" $2 ":" $3 ":" diff}' "$input_file_c" \
+		| sort -t: -k4 -n -r > "$output_file_c"
 
-		# Fusionner les résultats dans un fichier final lv_all_minmax.csv
-		cat tmp/lv_all_min_$centrale.csv tmp/lv_all_max_$centrale.csv > tmp/lv_all_minmax_$centrale.csv
-		echo "Résultats min et max fusionnés dans : tmp/lv_all_minmax_$centrale.csv"
+		echo "Le fichier trié avec la différence absolue : $output_file_c"
+
 		   
         else
         
-		# Sélection des 10 postes avec la plus grande consommation (les 10 derniers en triant par ordre croissant)
-		tail -n 10 tmp/lv_all.csv | sort -t':' -k3,3nr > tmp/lv_all_max.csv
-		echo "Top 10 postes avec la plus grande consommation : tmp/lv_all_max.csv"
+       		sort -t':' -k3,3n tmp/lv_all_APRES_C.csv | head -n 10 > "$input_file"
+		sort -t':' -k3,3n tmp/lv_all_APRES_C.csv | tail -n 10 >> "$input_file"
 
-		# Sélection des 10 postes avec la plus faible consommation (les 10 premiers)
-		head -n 10 tmp/lv_all.csv > tmp/lv_all_min.csv
-		echo "Top 10 postes avec la plus faible consommation : tmp/lv_all_min.csv"
+       		echo "VOICI LES 20 DONT FAUT FAIRE LA DIFF ABSOLUE : tmp/lv_all_top20.csv"
+	       		
+		awk -F: '{diff = ($2 - $3) < 0 ? ($3 - $2) : ($2 - $3); print $1 ":" $2 ":" $3 ":" diff}' "$input_file" \
+		| sort -t: -k4 -n -r > "$output_file"
 
-		# Fusionner les résultats dans un fichier final lv_all_minmax.csv
-		cat tmp/lv_all_min.csv tmp/lv_all_max.csv > tmp/lv_all_minmax.csv
-		echo "Résultats min et max fusionnés dans : tmp/lv_all_minmax.csv"
+		echo "Le fichier trié avec la différence absolue : $output_file"
         
         fi
+      fi
+INPUT_FILE="output/lv_all_minmax.csv"
+
+# Vérification si le fichier existe
+if [[ ! -f "$INPUT_FILE" ]]; then
+  echo "Erreur : Fichier $INPUT_FILE introuvable."
+  exit 1
 fi
+
+# Extraction des 10 premières stations dans un fichier temporaire
+awk -F':' 'NR<=10 {print $1, $4}' "$INPUT_FILE" > top_10_stations.csv
+
+# Extraction des 10 dernières stations dans un fichier temporaire
+awk -F':' 'NR>10 {print $1, $4}' "$INPUT_FILE" > bottom_10_stations.csv
+
+# Exécution du script Gnuplot
+gnuplot lv.gnu
+
+rm -f top_10_stations.csv bottom_10_stations.csv
+
+      
+      
 
 else
     echo "Erreur : Type de station invalide."
@@ -403,4 +477,3 @@ echo
 echo "Durée du traitement : ${execution_time} secondes."
 
 exit 0
-
