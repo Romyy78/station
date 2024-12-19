@@ -14,8 +14,10 @@
 
 ### Exécution
 1. Accédez à la racine du projet : cd projet
-2. Se donner les permission : chmod +x c-wire.sh
-3. Exécutez le script Shell pour traiter les données :
+2. Se donner les permissions :   ```bash
+3.    chmod +x c-wire.sh
+       ```
+4. Exécutez le script Shell pour traiter les données :
    
    ./c-wire.sh <chemin_fichier_csv> <type_station> <type_consommateur> [<id_centrale>] [-h]
    
@@ -29,8 +31,10 @@
        ```bash
        ./c-wire.sh -h
        ```
-4. Les fichiers de sortie seront générés dans le dossier `output/` sous des noms comme `lv_all.csv` ou `lv_all_minmax.csv`.
-5. Les graphique seront générés dans le dossier `graphs/` sous le nom `graphs/lv_top_minmax.png`.
+       
+5. Les fichiers de sortie seront générés dans le dossier `output/` sous des noms comme `lv_all.csv` ou `lv_all_minmax.csv`.
+6. Les graphique seront générés dans le dossier `graphs/` sous le nom `graphs/lv_top_minmax.png`.
+7. pour supprimer l'executable et les .o faire : cd codeC puis make clean et enfin cd .. pour retourné au coeur du projet.
 
 
 
