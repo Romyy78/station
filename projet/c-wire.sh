@@ -32,8 +32,7 @@ then
     echo "Le dossier 'input' n'existe pas. Création du dossier..."
     mkdir "input"
 else
-   # echo "Le dossier 'input' existe déjà."
-    echo
+    echo "Le dossier 'input' existe déjà."
 fi
 
 if [ ! -d "output" ]
@@ -41,8 +40,7 @@ then
     echo "Le dossier 'output' n'existe pas. Création du dossier..."
     mkdir "output"
 else
- #   echo "Le dossier 'output' existe déjà."
-    echo
+    echo "Le dossier 'output' existe déjà."
 fi
 
 if [ ! -d "tests" ]
@@ -50,7 +48,7 @@ then
     echo "Le dossier 'tests' n'existe pas. Création du dossier..."
     mkdir "tests"
 else
- #   echo "Le dossier 'tests' existe déjà."
+    echo "Le dossier 'tests' existe déjà."
     echo
 fi
 
@@ -219,25 +217,27 @@ then
         fi
 
         # Compilation avec c-wire
-       # ./c-wire ../tmp/hvb_comp_BEFORE_C.dat > tmp/hvb_AFTER_C.csv
-         cd codeC
-       ./c-wire ../tmp/hvb_comp_BEFORE_C.dat > ../tmp/hvb_AFTER_C.csv
-        cd ..
-        echo "Résultat APRES le script c : tmp/hvb_AFTER_C.csv"
 
-        # Tri de tmp/hvb_AFTER_C.csv par la deuxième colonne (en croissant)
+         cd codeC
+         ./c-wire ../tmp/hvb_comp_BEFORE_C.dat > ../tmp/hvb_AFTER_C.csv
+         cd ..
+         echo "Résultat APRES le script c : tmp/hvb_AFTER_C.csv"
+
+        # Tri de hvb_AFTER_C.csv par la capacité
         
-        if [[ -n "$centrale" ]]; then
+        if [[ -n "$centrale" ]]
+        then
         	
-            sort -t':' -k2,2n tmp/hvb_AFTER_C.csv > output/hvb_comp_$centrale.csv
+            echo "HVB:Capacité:Consommation (entreprises)" > output/hvb_comp_$centrale.csv
+            sort -t':' -k2,2n tmp/hvb_AFTER_C.csv >> output/hvb_comp_$centrale.csv
             echo "Résultat final : output/hvb_comp_$centrale.csv"
-            echo "HVB:Capacité:Consommation (entreprises)"\
-            | cat - output/hvb_comp_$centrale.csv > temp && mv temp output/hvb_comp_$centrale.csv
+            
         else
-        	echo "HVB:Capacité:Consommation (entreprises)" > output/hvb_comp.csv
-            sort -t':' -k2 -n tmp/hvb_AFTER_C.csv >> output/hvb_comp.csv
-             
+        
+            echo "HVB:Capacité:Consommation (entreprises)" > output/hvb_comp.csv
+            sort -t':' -k2,2n tmp/hvb_AFTER_C.csv >> output/hvb_comp.csv
             echo "Résultat final : output/hvb_comp.csv"
+            
         fi
     fi
 
@@ -268,31 +268,21 @@ then
         fi
 
         # Compilation avec c-wire
-       # "$CWIRE_BINARY" tmp/hva_comp_BEFORE_C.dat > tmp/hva_AFTER_C.csv
-       
-        cd codeC
+       cd codeC
        ./c-wire ../tmp/hva_comp_BEFORE_C.dat > ../tmp/hva_AFTER_C.csv
-        cd ..
-        
-        echo "Résultat APRES le script c : tmp/hva_comp_AFTER_C.csv"
+       cd ..
+       echo "Résultat APRES le script c : tmp/hva_comp_AFTER_C.csv"
 
-       # Tri de tmp/hva_AFTER_C.csv par la deuxième colonne (en croissant)
+       # Tri de hva_AFTER_C.csv par la capacité
         if [[ -n "$centrale" ]]
         then
-            sort -t':' -k2,2n tmp/hva_AFTER_C.csv > output/hva_comp_$centrale.csv
+ 	    echo "HVA:Capacité:Consommation (entreprises)" > output/hva_comp_$centrale.csv
+            sort -t':' -k2,2n tmp/hva_AFTER_C.csv >> output/hva_comp_$centrale.csv
             echo "Résultat final : output/hva_comp_$centrale.csv"
-            echo "HVA:Capacité:Consommation (entreprises)"\
-            | cat - output/hva_comp_$centrale.csv > temp && mv temp output/hva_comp_$centrale.csv
-        else
-          #  sort -t':' -k2,2n tmp/hva_AFTER_C.csv > output/hva_comp.csv
-           # echo "Résultat final : output/hva_comp.csv"
- 	    #echo "HVA:Capacité:Consommation (entreprises)" | cat - output/hvb_comp.csv > temp && mv temp output/hvb_comp.csv
- 	    
- 	    	echo "HVA:Capacité:Consommation (entreprises)" > output/hva_comp.csv
-            sort -t':' -k2 -n tmp/hva_AFTER_C.csv >> output/hva_comp.csv
-             
+        else   
+ 	    echo "HVA:Capacité:Consommation (entreprises)" > output/hva_comp.csv
+            sort -t':' -k2,2n tmp/hva_AFTER_C.csv >> output/hva_comp.csv
             echo "Résultat final : output/hva_comp.csv"
-
         fi
     fi
 
@@ -322,24 +312,23 @@ then
             ' "$fichier" > tmp/lv_comp_AVANT_C.dat
             echo "Résultat AVANT le script c : tmp/lv_comp_AVANT_C.dat"
         fi
-
-       cd codeC
-       ./c-wire ../tmp/lv_comp_AVANT_C.dat > ../tmp/lv_comp_APRES_C.csv
+ 	# Compilation avec c-wire
+        cd codeC
+        ./c-wire ../tmp/lv_comp_AVANT_C.dat > ../tmp/lv_comp_APRES_C.csv
         cd ..
-        # Compilation avec c-wire
-       # "$CWIRE_BINARY" tmp/lv_comp_AVANT_C.dat > tmp/lv_comp_APRES_C.csv
         echo "Résultat APRES le script c : tmp/lv_comp_APRES_C.csv"
 
-          if [[ -n "$centrale" ]]
+        if [[ -n "$centrale" ]]
         then
-            sort -t':' -k2,2n tmp/lv_comp_APRES_C.csv > output/lv_comp_$centrale.csv
-            echo "Résultat final : output/lv_comp_$centrale.csv"
-            echo "LV:Capacité:Consommation (entreprises)"\
-            | cat - output/lv_comp_$centrale.csv > temp && mv temp output/lv_comp_$centrale.csv
+            echo "LV:Capacité:Consommation (entreprises)" > output/lv_comp_$centrale.csv
+            sort -t':' -k2,2n tmp/lv_comp_APRES_C.csv >> output/lv_comp_$centrale.csv 
+            echo "Résultat final : output/lv_comp_$centrale.csv" 
         else
-            sort -t':' -k2,2n tmp/lv_comp_APRES_C.csv > output/lv_comp.csv
-            echo "Résultat final : output/lv_comp.csv"
-            echo "LV:Capacité:Consommation (entreprises)" | cat - output/lv_comp.csv > temp && mv temp output/lv_comp.csv
+        
+            echo "LV:Capacité:Consommation (entreprises)" > output/lv_comp.csv
+            sort -t':' -k2,2n tmp/lv_comp_APRES_C.csv >> output/lv_comp.csv 
+            echo "Résultat final : output/lv_comp.csv" 
+            
         fi
     
 
@@ -365,24 +354,22 @@ then
         echo "Résultat AVANT le script c : tmp/lv_indiv_AVANT_C.dat"  
       fi
         
+         # Compilation avec c-wire
          cd codeC
-       ./c-wire ../tmp/lv_indiv_AVANT_C.dat > ../tmp/lv_indiv_APRES_C.csv
-        cd ..
-     #   "$CWIRE_BINARY" tmp/lv_indiv_AVANT_C.dat > tmp/lv_indiv_APRES_C.csv
-        echo "Résultat APRES le script c : tmp/lv_indiv_APRES_C.csv"
+         ./c-wire ../tmp/lv_indiv_AVANT_C.dat > ../tmp/lv_indiv_APRES_C.csv
+         cd ..
+         echo "Résultat APRES le script c : tmp/lv_indiv_APRES_C.csv"
         
         
-
       if [[ -n "$centrale" ]]
         then
-            sort -t':' -k2,2n tmp/lv_indiv_APRES_C.csv > output/lv_indiv_$centrale.csv
-            echo "Résultat final : output/lv_indiv_$centrale.csv"
-            echo "LV:Capacité:Consommation (particuliers)"\
-            | cat - output/lv_indiv_$centrale.csv > temp && mv temp output/lv_indiv_$centrale.csv
+            echo "LV:Capacité:Consommation (particuliers)" > output/lv_indiv_$centrale.csv
+            sort -t':' -k2,2n tmp/lv_indiv_APRES_C.csv >> output/lv_indiv_$centrale.csv 
+            echo "Résultat final : output/lv_indiv_$centrale.csv" 
         else
-            sort -t':' -k2,2n tmp/lv_indiv_APRES_C.csv > output/lv_indiv.csv
-            echo "Résultat final : output/lv_indiv.csv"
-            echo "LV:Capacité:Consommation (particuliers)" | cat - output/lv_indiv.csv > temp && mv temp output/lv_indiv.csv
+            echo "LV:Capacité:Consommation (particuliers)" > output/lv_indiv.csv
+            sort -t':' -k2,2n tmp/lv_indiv_APRES_C.csv >> output/lv_indiv.csv 
+            echo "Résultat final : output/lv_indiv.csv" 
         fi
 
 
@@ -408,22 +395,22 @@ then
         echo "Résultat AVANT le script c : tmp/lv_all_AVANT_C.dat"
         fi
         
+        # Compilation avec c-wire
          cd codeC
-       ./c-wire ../tmp/lv_all_AVANT_C.dat > ../tmp/lv_all_APRES_C.csv
-        cd ..
-        #"$CWIRE_BINARY" tmp/lv_all_AVANT_C.dat > tmp/lv_all_APRES_C.csv
-        echo "Résultat APRES le script c  : tmp/lv_all_APRES_C.csv"
-        
-       
-        
-         # Tri de tmp/lv_all_result.csv par la troisieme colonne (en croissant) en utilisant ':' comme séparateur
+         ./c-wire ../tmp/lv_all_AVANT_C.dat > ../tmp/lv_all_APRES_C.csv
+         cd ..
+	 echo "Résultat APRES le script c  : tmp/lv_all_APRES_C.csv"
+
+        # Tri de lv_all_APRES_C.csv par la capacité
         if [[ -n "$centrale" ]]
         then
-        	 sort -t':' -k2,2n tmp/lv_all_APRES_C.csv > output/lv_all_$centrale.csv
-       		 echo "Résultat final : output/lv_all_$centrale.csv"
+            echo "LV:Capacité:Consommation (tous)" > output/lv_all_$centrale.csv
+            sort -t':' -k2,2n tmp/lv_all_APRES_C.csv >> output/lv_all_$centrale.csv 
+            echo "Résultat final : output/lv_all_$centrale.csv" 
         else
-       	 	 sort -t':' -k2,2n tmp/lv_all_APRES_C.csv > output/lv_all.csv
-       		 echo "Résultat final : output/lv_all.csv"
+            echo "LV:Capacité:Consommation (tous)" > output/lv_all.csv
+            sort -t':' -k2,2n tmp/lv_all_APRES_C.csv >> output/lv_all.csv 
+            echo "Résultat final : output/lv_all.csv" 
         fi
 
        
@@ -447,54 +434,36 @@ output_file_c="output/lv_all_minmax_$centrale.csv"
 		| sort -t: -k4 -n -r > "$output_file_c"
 
 		echo "Le fichier trié avec la différence absolue : $output_file_c"
-		INPUT_FILE="output/lv_all_minmax_$centrale.csv"
-		# Vérification si le fichier existe
-if [[ ! -f "$INPUT_FILE" ]]; then
-  echo "Erreur : Fichier $INPUT_FILE introuvable ."
-  exit 1
-fi
+		
+		awk -F":" 'BEGIN {OFS=":"} NR<=10 {print $1, $2, $3, $4, $4, 0} NR>10 {print $1, $2, $3, $4, 0, $4}' \
+		output/lv_all_minmax_$centrale.csv > tmp/lv_all_minmax_grouped.csv
+
+		gnuplot lv.gnu
+		
+		echo "lv:capacité:Consommation (tous):différence" \
+		| cat - output/lv_all_minmax_$centrale.csv > temp && mv temp output/lv_all_minmax_$centrale.csv		
 		   
         else
-        	#INPUT_FILE="output/lv_all_minmax.csv"
-        	# Vérification si le fichier existe
-#if [[ ! -f "$INPUT_FILE" ]]; then
-  #echo "Erreur : Fichier $INPUT_FILE introuvable ."
- # exit 1
-#fi
-       		sort -t':' -k3,3n tmp/lv_all_APRES_C.csv | head -n 10 > "$input_file"
+
+     		sort -t':' -k3,3n tmp/lv_all_APRES_C.csv | head -n 10 > "$input_file"
 		sort -t':' -k3,3n tmp/lv_all_APRES_C.csv | tail -n 10 >> "$input_file"
 
        		echo "VOICI LES 20 DONT FAUT FAIRE LA DIFF ABSOLUE : tmp/lv_all_top20.csv"
 	       		
 		awk -F: '{diff = ($2 - $3) < 0 ? ($3 - $2) : ($2 - $3); print $1 ":" $2 ":" $3 ":" diff}' "$input_file" \
 		| sort -t: -k4 -n -r > "$output_file"
-
 		echo "Le fichier trié avec la différence absolue : $output_file"
-        
+	
+		awk -F":" 'BEGIN {OFS=":"} NR<=10 {print $1, $2, $3, $4, $4, 0} NR>10 {print $1, $2, $3, $4, 0, $4}' \
+		output/lv_all_minmax.csv > tmp/lv_all_minmax_grouped.csv
+
+		gnuplot lv.gnu
+		echo "graphique généré"
+		
+echo "lv:capacité:Consommation (tous):différence" | cat - output/lv_all_minmax.csv > temp && mv temp output/lv_all_minmax.csv
+		       
         fi
       fi
-      
-#INPUT_FILE="output/lv_all_minmax.csv"
-
-# Vérification si le fichier existe
-#if [[ ! -f "$INPUT_FILE" ]]; then
- # echo "Erreur : Fichier $INPUT_FILE introuvable ."
-  #exit 1
-#fi
-
-# Extraction des 10 premières stations dans un fichier temporaire
-#awk -F':' 'NR<=10 {print $1, $4}' "$INPUT_FILE" > top_10_stations.dat
-
-# Extraction des 10 dernières stations dans un fichier temporaire
-#awk -F':' 'NR>10 {print $1, $4}' "$INPUT_FILE" > bottom_10_stations.dat
-
-# Exécution du script Gnuplot
-#gnuplot lv.gnu
-
-#rm -f top_10_stations.dat bottom_10_stations.dat
-
-      
-      
 
 else
     echo "Erreur : Type de station invalide."
