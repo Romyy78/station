@@ -32,7 +32,7 @@ then
     echo "Le dossier 'input' n'existe pas. Création du dossier..."
     mkdir "input"
 else
-    echo "Le dossier 'input' existe déjà."
+   # echo "Le dossier 'input' existe déjà."
     echo
 fi
 
@@ -41,7 +41,7 @@ then
     echo "Le dossier 'output' n'existe pas. Création du dossier..."
     mkdir "output"
 else
-    echo "Le dossier 'output' existe déjà."
+ #   echo "Le dossier 'output' existe déjà."
     echo
 fi
 
@@ -50,7 +50,7 @@ then
     echo "Le dossier 'tests' n'existe pas. Création du dossier..."
     mkdir "tests"
 else
-    echo "Le dossier 'tests' existe déjà."
+ #   echo "Le dossier 'tests' existe déjà."
     echo
 fi
 
@@ -144,19 +144,20 @@ fi
 
 # Compilation de c-wire
 # Définir les fichiers source et l'exécutable
-CWIRE_SOURCES="main.c fonction.c"  # Liste de tous les fichiers sources
-CWIRE_BINARY="./c-wire"             # Nom de l'exécutable
+CWIRE_SOURCES="codeC/main.c codeC/fonction.c"  # Liste de tous les fichiers sources
+CWIRE_BINARY="codeC/c-wire"             # Nom de l'exécutable
 
 
 executable="c-wire"
 
 # Vérification de la présence de l'exécutable
-if [ ! -x "$executable" ]; then
+if [ ! -x "codeC/$executable" ]; then
    echo "L'exécutable n'est pas présent. Compilation en cours..."
    
    # Compilation du programme C
+   cd codeC
    make
-   
+   cd ..
    # Vérification du déroulement de la compilation
    if [ $? -eq 0 ]; then
        echo "Compilation réussie. L'exécutable $executable a été créé."
@@ -170,6 +171,7 @@ else
     echo "L'exécutable $executable existe déjà."
     echo
 fi
+
 
 
 for dir in "tmp" "graphs" "output"; do
@@ -217,19 +219,24 @@ then
         fi
 
         # Compilation avec c-wire
-        "$CWIRE_BINARY" tmp/hvb_comp_BEFORE_C.dat > tmp/hvb_AFTER_C.csv
+       # ./c-wire ../tmp/hvb_comp_BEFORE_C.dat > tmp/hvb_AFTER_C.csv
+         cd codeC
+       ./c-wire ../tmp/hvb_comp_BEFORE_C.dat > ../tmp/hvb_AFTER_C.csv
+        cd ..
         echo "Résultat APRES le script c : tmp/hvb_AFTER_C.csv"
 
         # Tri de tmp/hvb_AFTER_C.csv par la deuxième colonne (en croissant)
         
         if [[ -n "$centrale" ]]; then
+        	
             sort -t':' -k2,2n tmp/hvb_AFTER_C.csv > output/hvb_comp_$centrale.csv
             echo "Résultat final : output/hvb_comp_$centrale.csv"
             echo "HVB:Capacité:Consommation (entreprises)"\
             | cat - output/hvb_comp_$centrale.csv > temp && mv temp output/hvb_comp_$centrale.csv
         else
-            sort -t':' -k2,2n tmp/hvb_AFTER_C.csv > output/hvb_comp.csv
-            echo "HVB:Capacité:Consommation (entreprises)" cat - output/hvb_comp.csv > temp && mv temp output/hvb_comp.csv
+        	echo "HVB:Capacité:Consommation (entreprises)" > output/hvb_comp.csv
+            sort -t':' -k2 -n tmp/hvb_AFTER_C.csv >> output/hvb_comp.csv
+             
             echo "Résultat final : output/hvb_comp.csv"
         fi
     fi
@@ -261,7 +268,12 @@ then
         fi
 
         # Compilation avec c-wire
-        "$CWIRE_BINARY" tmp/hva_comp_BEFORE_C.dat > tmp/hva_AFTER_C.csv
+       # "$CWIRE_BINARY" tmp/hva_comp_BEFORE_C.dat > tmp/hva_AFTER_C.csv
+       
+        cd codeC
+       ./c-wire ../tmp/hva_comp_BEFORE_C.dat > ../tmp/hva_AFTER_C.csv
+        cd ..
+        
         echo "Résultat APRES le script c : tmp/hva_comp_AFTER_C.csv"
 
        # Tri de tmp/hva_AFTER_C.csv par la deuxième colonne (en croissant)
@@ -272,9 +284,14 @@ then
             echo "HVA:Capacité:Consommation (entreprises)"\
             | cat - output/hva_comp_$centrale.csv > temp && mv temp output/hva_comp_$centrale.csv
         else
-            sort -t':' -k2,2n tmp/hva_AFTER_C.csv > output/hva_comp.csv
+          #  sort -t':' -k2,2n tmp/hva_AFTER_C.csv > output/hva_comp.csv
+           # echo "Résultat final : output/hva_comp.csv"
+ 	    #echo "HVA:Capacité:Consommation (entreprises)" | cat - output/hvb_comp.csv > temp && mv temp output/hvb_comp.csv
+ 	    
+ 	    	echo "HVA:Capacité:Consommation (entreprises)" > output/hva_comp.csv
+            sort -t':' -k2 -n tmp/hva_AFTER_C.csv >> output/hva_comp.csv
+             
             echo "Résultat final : output/hva_comp.csv"
- 	    echo "HVA:Capacité:Consommation (entreprises)" | cat - output/hvb_comp.csv > temp && mv temp output/hvb_comp.csv
 
         fi
     fi
@@ -306,8 +323,11 @@ then
             echo "Résultat AVANT le script c : tmp/lv_comp_AVANT_C.dat"
         fi
 
+       cd codeC
+       ./c-wire ../tmp/lv_comp_AVANT_C.dat > ../tmp/lv_comp_APRES_C.csv
+        cd ..
         # Compilation avec c-wire
-        "$CWIRE_BINARY" tmp/lv_comp_AVANT_C.dat > tmp/lv_comp_APRES_C.csv
+       # "$CWIRE_BINARY" tmp/lv_comp_AVANT_C.dat > tmp/lv_comp_APRES_C.csv
         echo "Résultat APRES le script c : tmp/lv_comp_APRES_C.csv"
 
           if [[ -n "$centrale" ]]
@@ -345,8 +365,10 @@ then
         echo "Résultat AVANT le script c : tmp/lv_indiv_AVANT_C.dat"  
       fi
         
-        
-        "$CWIRE_BINARY" tmp/lv_indiv_AVANT_C.dat > tmp/lv_indiv_APRES_C.csv
+         cd codeC
+       ./c-wire ../tmp/lv_indiv_AVANT_C.dat > ../tmp/lv_indiv_APRES_C.csv
+        cd ..
+     #   "$CWIRE_BINARY" tmp/lv_indiv_AVANT_C.dat > tmp/lv_indiv_APRES_C.csv
         echo "Résultat APRES le script c : tmp/lv_indiv_APRES_C.csv"
         
         
@@ -386,8 +408,10 @@ then
         echo "Résultat AVANT le script c : tmp/lv_all_AVANT_C.dat"
         fi
         
-        
-        "$CWIRE_BINARY" tmp/lv_all_AVANT_C.dat > tmp/lv_all_APRES_C.csv
+         cd codeC
+       ./c-wire ../tmp/lv_all_AVANT_C.dat > ../tmp/lv_all_APRES_C.csv
+        cd ..
+        #"$CWIRE_BINARY" tmp/lv_all_AVANT_C.dat > tmp/lv_all_APRES_C.csv
         echo "Résultat APRES le script c  : tmp/lv_all_APRES_C.csv"
         
        
@@ -423,10 +447,20 @@ output_file_c="output/lv_all_minmax_$centrale.csv"
 		| sort -t: -k4 -n -r > "$output_file_c"
 
 		echo "Le fichier trié avec la différence absolue : $output_file_c"
-
+		INPUT_FILE="output/lv_all_minmax_$centrale.csv"
+		# Vérification si le fichier existe
+if [[ ! -f "$INPUT_FILE" ]]; then
+  echo "Erreur : Fichier $INPUT_FILE introuvable ."
+  exit 1
+fi
 		   
         else
-        
+        	#INPUT_FILE="output/lv_all_minmax.csv"
+        	# Vérification si le fichier existe
+#if [[ ! -f "$INPUT_FILE" ]]; then
+  #echo "Erreur : Fichier $INPUT_FILE introuvable ."
+ # exit 1
+#fi
        		sort -t':' -k3,3n tmp/lv_all_APRES_C.csv | head -n 10 > "$input_file"
 		sort -t':' -k3,3n tmp/lv_all_APRES_C.csv | tail -n 10 >> "$input_file"
 
@@ -439,24 +473,25 @@ output_file_c="output/lv_all_minmax_$centrale.csv"
         
         fi
       fi
-INPUT_FILE="output/lv_all_minmax.csv"
+      
+#INPUT_FILE="output/lv_all_minmax.csv"
 
 # Vérification si le fichier existe
-if [[ ! -f "$INPUT_FILE" ]]; then
-  echo "Erreur : Fichier $INPUT_FILE introuvable."
-  exit 1
-fi
+#if [[ ! -f "$INPUT_FILE" ]]; then
+ # echo "Erreur : Fichier $INPUT_FILE introuvable ."
+  #exit 1
+#fi
 
 # Extraction des 10 premières stations dans un fichier temporaire
-awk -F':' 'NR<=10 {print $1, $4}' "$INPUT_FILE" > top_10_stations.csv
+#awk -F':' 'NR<=10 {print $1, $4}' "$INPUT_FILE" > top_10_stations.dat
 
 # Extraction des 10 dernières stations dans un fichier temporaire
-awk -F':' 'NR>10 {print $1, $4}' "$INPUT_FILE" > bottom_10_stations.csv
+#awk -F':' 'NR>10 {print $1, $4}' "$INPUT_FILE" > bottom_10_stations.dat
 
 # Exécution du script Gnuplot
-gnuplot lv.gnu
+#gnuplot lv.gnu
 
-rm -f top_10_stations.csv bottom_10_stations.csv
+#rm -f top_10_stations.dat bottom_10_stations.dat
 
       
       
