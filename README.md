@@ -14,8 +14,8 @@
 
 ### Exécution
 1. Accédez à la racine du projet : cd projet
-2. Se donner les permissions :   ```bash
-3.    chmod +x c-wire.sh
+2. Se donner les permissions :   ```bash 
+chmod +x c-wire.sh
        ```
 4. Exécutez le script Shell pour traiter les données :
    
