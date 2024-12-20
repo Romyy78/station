@@ -14,8 +14,9 @@
 
 ### Exécution
 1. Accédez à la racine du projet et mettez le fichier a traiter dans le sous dossier input : cd projet
-2. Se donner les permissions :   ```bash 
-chmod +x c-wire.sh
+2. Se donner les permissions :
+3.   ``` bash
+       chmod +x c-wire.sh
        ```
 4. Exécutez le script Shell pour traiter les données :
    
