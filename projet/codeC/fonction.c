@@ -111,7 +111,7 @@ AVL* equilibrerAVL(AVL* A) {
 // Fonction d'insertion dans l'arbre AVL
 AVL* insertion(AVL* A, int ID, unsigned long  capa, unsigned long  conso, int* h) {
     if (A == NULL) {
-        *h = 1;  // Indicateur de changement de hauteur
+        *h = 1;  // Indicateur de changement de h
         return creation(ID, capa, conso);
     }
 
@@ -127,7 +127,7 @@ AVL* insertion(AVL* A, int ID, unsigned long  capa, unsigned long  conso, int* h
     else {
         A->capacité += capa;  // Mise à jour de la capacité si l'élément est déjà dans l'arbre
         A->consommateur += conso;  // Mise à jour de la consommation
-        *h = 0;  // Pas de changement de hauteur si l'élément est déjà dans l'arbre
+        *h = 0;  
     }
 
     // Rééquilibrage après insertion

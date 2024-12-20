@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
 
     AVL* racine = NULL;
 
-    char ligne[1000]; // Vous pouvez ajuster cette taille en fonction de vos besoins
+    char ligne[1000]; 
 
     while (fgets(ligne, sizeof(ligne), fichier) != NULL) {
         int id;
@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
             continue; // Ignorer la ligne incorrecte et passer à la suivante
         }
 
-        int hauteur = 0; // Indicateur de changement de hauteur
+        int hauteur = 0; 
         racine = insertion(racine, id, capacité, consommation, &hauteur);
     }
 
