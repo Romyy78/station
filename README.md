@@ -10,7 +10,7 @@
   - GCC (compilateur C)
   - Make (outil de compilation)
   - Bash (pour exécuter le script Shell)
-  - GnuPlot (pour le bonus graphique, si applicable)
+  - GnuPlot (pour le graphique)
 
 ### Exécution
 1. Accédez à la racine du projet : cd projet
