@@ -13,7 +13,7 @@
   - GnuPlot (pour le graphique)
 
 ### Exécution
-1. Accédez à la racine du projet qui se nomme "projet" et mettez IMPERATIVEMENT le fichier a traiter dans le sous dossier input : cd projet
+1. Accédez à la racine du projet qui se nomme "projet" et mettez IMPERATIVEMENT le fichier a traiter dans le sous dossier input. Si vous téléchargez le zip il faut extraite le dossier projet dans vos dossiers personnels puis il faudra faire : cd projet
 2. Se donner les permissions :
    ``` bash
        chmod +x c-wire.sh
